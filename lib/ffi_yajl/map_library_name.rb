@@ -65,10 +65,17 @@ module FFI_Yajl
     # @api private
     # @return Array<String> Array of full paths to libyajl2 gem libraries
     def expanded_library_names
-      library_names.map do |libname|
+      major, minor, = RUBY_VERSION.split(".")
+      ruby_api_version = "#{major}.#{minor}"
+      names = library_names.map do |libname|
+        pathname = File.expand_path(File.join(Libyajl2.opt_path, ruby_api_version, libname))
+        pathname if File.file?(pathname)
+      end
+      names += library_names.map do |libname|
         pathname = File.expand_path(File.join(Libyajl2.opt_path, libname))
         pathname if File.file?(pathname)
-      end.compact
+      end
+      names.compact
     end
 
     # Iterate across the expanded library names in the libyajl2-gem and then
